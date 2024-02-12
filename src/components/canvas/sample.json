@@ -1,0 +1,23 @@
+{
+    "menu":[
+        {
+            "id":1,
+            "shape":"rect"
+        },
+        {
+            "id":2,
+            "shape":"circle"
+        },
+        {
+            "id":3,
+            "shape":"triangle"
+        }
+    ],
+    "shapes":[
+    {
+        "id":"react1",
+        "type":"rect",
+        "info":{}
+    }
+]
+}

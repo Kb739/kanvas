@@ -1,0 +1,35 @@
+.canvas-menu {
+  display: flex;
+  padding: 10px;
+  border-radius: 3px;
+  gap: 10px;
+  justify-content: space-around;
+  background-color: rgba(20, 105, 155, 0.5);
+  box-shadow: 0 3px 5px rgb(128, 128, 128, 0.7);
+  margin-bottom: 10px;
+}
+.canvas-container {
+  border: 1px solid #d3d3d3;
+  border-radius: 5px;
+  margin: 10px;
+  padding: 10px;
+}
+.img-handle-upload{
+  display: none;
+}
+.img-handle-menu{
+    padding: 0 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+.img-handle-thumbnail-container{
+    background-color: gray;
+    height: 300px;
+    aspect-ratio: 1/1;
+    overflow-y: scroll;
+}
+.img-handle-thumbnail{
+    max-width: 100%;
+    aspect-ratio: 1/1;
+}
