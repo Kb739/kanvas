@@ -1,40 +1,43 @@
-import { useState, useRef, useMemo } from "react";
-import { Button, Menu, Grid } from "@mui/material";
+import { useRef, useMemo } from "react";
+import { Button, Grid } from "@mui/material";
+import ImageIcon from '@mui/icons-material/PermMediaOutlined';
+import UploadIcon from '@mui/icons-material/FileUpload';
+import Popup from "./Popup";
 
 export default function ImageHandle(props) {
-  const { onClickUpload, imageSources } = props;
-  const [anchorEl, setAnchorEl] = useState(null);
-  const open = Boolean(anchorEl);
+  const { onClickUpload, images,thumbClick } = props;
   const fileInputRef = useRef();
-
-  function toggleMenu(e) {
-    setAnchorEl((prev) => (prev ? null : e.currentTarget));
+  const popupRef = useRef(null)
+  function handleClick(e) {
+    popupRef.current.click(e)
   }
+
   const thumbnails = useMemo(() => {
-    return imageSources.map((dataURL, index) => {
+    return images.map((info, index) => {
       return (
         <Grid item xs={3}>
           <img
             key={index}
-            src={dataURL}
+            src={info.dataURL}
             alt={`thumbnail ${index}`}
             className="img-handle-thumbnail"
+            onClick={() => thumbClick(info)}
           />
         </Grid>
       );
     });
-  }, [imageSources]);
+  }, [images, thumbClick])
   return (
     <div>
-      <Button onClick={toggleMenu}>Image Handle</Button>
-      <Menu open={open} anchorEl={anchorEl} onClose={() => setAnchorEl(null)}>
+      <ImageIcon onClick={ handleClick} className="menu-icon" />
+      <Popup ref={popupRef}>
         <div className="img-handle-menu">
           <div className="img-handle-thumbnail-container">
             <Grid container spacing={1}>
               {thumbnails}
             </Grid>
           </div>
-          <div>
+          <div style={{display:'flex',justifyContent:'right'}}>
             <input
               ref={fileInputRef}
               className="img-handle-upload"
@@ -44,17 +47,13 @@ export default function ImageHandle(props) {
               multiple
               onChange={onClickUpload}
             />
-            <Button
-              size="small"
-              variant="contained"
-              color="primary"
+            <UploadIcon
+              fontSize="large"
               onClick={(e) => fileInputRef.current.click()}
-            >
-              Add
-            </Button>
+            />
           </div>
         </div>
-      </Menu>
+      </Popup>
     </div>
   );
 }

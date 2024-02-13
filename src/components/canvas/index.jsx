@@ -1,9 +1,16 @@
 import { Layer, Stage } from "react-konva";
 import "./style.css";
 import Menu from "./Menu";
-import { useCallback, useMemo, useState } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useMemo,
+  useState,
+  useRef,
+  useEffect,
+} from "react";
 import Shape from "./Shape";
-import { getRelativePointerPosition } from "./utils";
+import { getRelativeCenterPosition, getRelativePointerPosition } from "./utils";
 const styles = {
   canvasStageStyle: {
     // backgroundColor: "#d3d3d3",
@@ -15,35 +22,19 @@ const styles = {
     // width: "500px"
   },
 };
-const getDefaultAttrs = (stageRef) => {
-  const params = {};
-  if (stageRef) {
-    const { attrs } = stageRef;
-    params.x = attrs.width * 0.5;
-    params.y = attrs.height * 0.5;
-  }
-  return params;
-};
 
-function Canvas({ items, addItem, updateCanvasItem, resetOptionSelected }) {
-  const [stageRef, setStageRef] = useState(null);
-  const callbackRef = useCallback((node) => {
-    setStageRef(node);
-  }, []);
+const Canvas = forwardRef(({ items, updateCanvasItem }, ref) => {
   const [selectedId, selectShape] = useState(null);
   const clickedOnStage = (e) => {
     const clickedOnEmpty = e.target === e.target.getStage();
     if (clickedOnEmpty) {
       selectShape(null);
-      addItem(getRelativePointerPosition(e.target.getStage()));
     }
-    resetOptionSelected();
   };
   const layer = useMemo(() => {
     return (
       <Layer>
         {items.map((item, index) => {
-          item.info = { ...getDefaultAttrs(stageRef), ...item.info };
           return (
             <Shape
               key={index}
@@ -60,10 +51,10 @@ function Canvas({ items, addItem, updateCanvasItem, resetOptionSelected }) {
         })}
       </Layer>
     );
-  }, [stageRef, selectedId, items, updateCanvasItem]);
+  }, [selectedId, items, updateCanvasItem]);
   return (
     <Stage
-      ref={callbackRef}
+      ref={ref}
       onMouseDown={clickedOnStage}
       width={window.innerWidth}
       height={700}
@@ -73,29 +64,29 @@ function Canvas({ items, addItem, updateCanvasItem, resetOptionSelected }) {
       {layer}
     </Stage>
   );
-}
+});
 
 export default function CanvasContainer({ data }) {
-  const [menuItems] = useState(data.menu);
-  const [canvasItems, setCanvasItems] = useState(data.shapes);
-  const [optionSelected, setOptionSelected] = useState(null);
-  const addItem = useCallback(
-    (attrs) => {
-      if (optionSelected) {
-        const params = {
-          type: optionSelected.shape,
-          id: `${optionSelected.shape}${canvasItems.length + 1}`,
-          info: {
-            x: attrs.x,
-            y: attrs.y,
-          },
-        };
-        setCanvasItems((prev) => {
-          return [...prev, params];
-        });
-      }
+  const [menuData, setMenuData] = useState(data.menu);
+  const [canvasItems, setCanvasItems] = useState(data.stage.shapes);
+  const stageRef = useRef(null);
+
+  const spawnItem = useCallback(
+    (details) => {
+      const spawnPos = getRelativeCenterPosition(stageRef.current);
+      const params = {
+        type: details.shape,
+        id: `${details.shape}${canvasItems.length + 1}`,
+        info: {
+          x: spawnPos.x,
+          y: spawnPos.y,
+        },
+      };
+      setCanvasItems((prev) => {
+        return [...prev, params];
+      });
     },
-    [canvasItems, optionSelected]
+    [canvasItems]
   );
 
   const updateCanvasItem = useCallback(
@@ -106,29 +97,45 @@ export default function CanvasContainer({ data }) {
     },
     [canvasItems]
   );
+  const handleImageUpload = useCallback((e) => {
+    const files = Array.from(e.target.files);
+    files.forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const src = reader.result;
+        setMenuData((prev) => {
+          return {
+            ...prev,
+            images: [
+              ...prev.images,
+              { id: `thumb${prev.length + 1}`, shape: "image", dataURL: src },
+            ],
+          };
+        });
+      };
+      reader.readAsDataURL(file);
+    });
+  }, []);
 
   const menu = useMemo(() => {
     return (
       <Menu
-        items={menuItems}
-        itemsClick={(details) => {
-          setOptionSelected(details);
-        }}
-        optionSelected={optionSelected}
+        data={menuData}
+        itemClick={spawnItem}
+        handleImageUpload={handleImageUpload}
       />
     );
-  }, [menuItems, optionSelected]);
+  }, [menuData,handleImageUpload, spawnItem]);
 
   const canvas = useMemo(() => {
     return (
       <Canvas
+        ref={stageRef}
         items={canvasItems}
-        addItem={addItem}
         updateCanvasItem={updateCanvasItem}
-        resetOptionSelected={() => setOptionSelected(null)}
       />
     );
-  }, [canvasItems, updateCanvasItem, addItem]);
+  }, [canvasItems, updateCanvasItem]);
 
   return (
     <div className="canvas-container">

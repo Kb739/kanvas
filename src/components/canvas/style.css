@@ -1,12 +1,16 @@
 .canvas-menu {
   display: flex;
-  padding: 10px;
+  padding: 15px;
+  border: 1px solid gray;
   border-radius: 3px;
   gap: 10px;
   justify-content: space-around;
-  background-color: rgba(20, 105, 155, 0.5);
-  box-shadow: 0 3px 5px rgb(128, 128, 128, 0.7);
+  background-color: rgba(20, 90, 150, 0.2);
+  /* box-shadow: 0 3px 5px rgb(128, 128, 128, 0.7); */
   margin-bottom: 10px;
+  max-width: 400px;
+  margin-right: auto;
+  margin-left: auto;
 }
 .canvas-container {
   border: 1px solid #d3d3d3;
@@ -18,18 +22,40 @@
   display: none;
 }
 .img-handle-menu{
-    padding: 0 8px;
     display: flex;
     flex-direction: column;
     gap: 5px;
 }
 .img-handle-thumbnail-container{
-    background-color: gray;
     height: 300px;
     aspect-ratio: 1/1;
     overflow-y: scroll;
+    padding: 5px;
 }
 .img-handle-thumbnail{
     max-width: 100%;
     aspect-ratio: 1/1;
+}
+
+.shape-handle-icon-container{
+  /* border: 1px solid grey; */
+  width: 250px;
+  overflow-y: scroll;
+}
+
+.shape-icon{
+  transition: transform 0.3s ease;
+}
+.shape-icon:hover{
+  transform: scale(1.15);
+}
+
+.popper-sx{
+  border: 1px solid gray;
+  border-radius: 3px;
+  box-shadow: 0 3px 5px rgb(128, 128, 128, 0.5);
+}
+
+.menu-icon:hover{
+  color:gray;
 }
