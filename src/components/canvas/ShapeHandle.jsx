@@ -2,7 +2,7 @@ import { useRef } from "react";
 import Popup from "./Popup";
 import { Grid, Button } from "@mui/material";
 import { getShapeIcon } from "./utils"
-import ShapeIcon from "@mui/icons-material/ShapeLineOutlined";
+import ShapeIcon from '@mui/icons-material/CategoryOutlined';
 
 
 export default function ShapeHandle(props) {

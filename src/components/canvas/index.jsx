@@ -1,39 +1,54 @@
-import { Layer, Stage } from "react-konva";
+import { Layer, Stage} from "react-konva";
 import "./style.css";
 import Menu from "./Menu";
 import {
-  forwardRef,
   useCallback,
   useMemo,
   useState,
-  useRef,
-  useEffect,
 } from "react";
 import Shape from "./Shape";
-import { getRelativeCenterPosition, getRelativePointerPosition } from "./utils";
+import { getRelativeCenterPosition} from "./utils";
+import Background from "./Background";
 const styles = {
   canvasStageStyle: {
     // backgroundColor: "#d3d3d3",
-    backgroundSize: "40px 40px",
-    backgroundImage:
-      "linear-gradient(to right,rgb(128, 128, 128,0.1) 1px,transparent 1px),linear-gradient(to bottom,rgb(128, 128, 128,0.1) 1px,transparent 1px)",
+    // backgroundSize: "40px 40px",
+    // backgroundImage:
+    //   "linear-gradient(to right,rgb(128, 128, 128,0.1) 1px,transparent 1px),linear-gradient(to bottom,rgb(128, 128, 128,0.1) 1px,transparent 1px)",
     border: "1px solid #d3d3d3",
+    // backgroundAttachment:"local",
     borderRadius: "3px",
+    overflow:'hidden'
+    // opacity:0.25
     // width: "500px"
   },
 };
 
-const Canvas = forwardRef(({ items, updateCanvasItem }, ref) => {
+const Canvas = ({ items, updateCanvasItem, stageRef, callbackRef,gridConfig }) => {
   const [selectedId, selectShape] = useState(null);
+  const [stagePos, setStagePos] = useState({ x: 0, y: 0 })
   const clickedOnStage = (e) => {
     const clickedOnEmpty = e.target === e.target.getStage();
     if (clickedOnEmpty) {
       selectShape(null);
     }
   };
-  const layer = useMemo(() => {
-    return (
+  return (
+    <Stage
+      // x={stagePos.x}
+      // y={stagePos.y}
+      ref={callbackRef}
+      onMouseDown={clickedOnStage}
+      width={window.innerWidth}
+      height={700}
+      style={styles.canvasStageStyle}
+      draggable
+      onDragEnd={(e) => {
+        setStagePos(e.currentTarget.position())
+      }}
+    >
       <Layer>
+      <Background stageRef={stageRef} stagePos={stagePos} cellSize={gridConfig.cellSize} />
         {items.map((item, index) => {
           return (
             <Shape
@@ -46,47 +61,41 @@ const Canvas = forwardRef(({ items, updateCanvasItem }, ref) => {
               onChange={(newAttrs) => {
                 updateCanvasItem(newAttrs, index);
               }}
+              gridConfig={gridConfig}
             />
           );
         })}
       </Layer>
+      </Stage>
     );
-  }, [selectedId, items, updateCanvasItem]);
-  return (
-    <Stage
-      ref={ref}
-      onMouseDown={clickedOnStage}
-      width={window.innerWidth}
-      height={700}
-      style={styles.canvasStageStyle}
-      draggable
-    >
-      {layer}
-    </Stage>
-  );
-});
+}
 
 export default function CanvasContainer({ data }) {
   const [menuData, setMenuData] = useState(data.menu);
   const [canvasItems, setCanvasItems] = useState(data.stage.shapes);
-  const stageRef = useRef(null);
+  const [gridConfig, setGridConfig] = useState(data.stage.gridConfig)
+  const [stageRef, setStageRef] = useState(null)
+  const callbackRef = useCallback((ref) => {
+    setStageRef(ref)
+  },[])
 
   const spawnItem = useCallback(
     (details) => {
-      const spawnPos = getRelativeCenterPosition(stageRef.current);
+      const spawnPos = getRelativeCenterPosition(stageRef);
       const params = {
         type: details.shape,
         id: `${details.shape}${canvasItems.length + 1}`,
         info: {
           x: spawnPos.x,
           y: spawnPos.y,
+          ...details.info
         },
       };
       setCanvasItems((prev) => {
         return [...prev, params];
       });
     },
-    [canvasItems]
+    [canvasItems,stageRef]
   );
 
   const updateCanvasItem = useCallback(
@@ -108,7 +117,7 @@ export default function CanvasContainer({ data }) {
             ...prev,
             images: [
               ...prev.images,
-              { id: `thumb${prev.length + 1}`, shape: "image", dataURL: src },
+              { id: `thumb${prev.length + 1}`, shape: "image", info: { dataURL: src }},
             ],
           };
         });
@@ -130,12 +139,14 @@ export default function CanvasContainer({ data }) {
   const canvas = useMemo(() => {
     return (
       <Canvas
-        ref={stageRef}
         items={canvasItems}
         updateCanvasItem={updateCanvasItem}
+        stageRef={stageRef}
+        callbackRef={callbackRef}
+        gridConfig={gridConfig}
       />
     );
-  }, [canvasItems, updateCanvasItem]);
+  }, [canvasItems, updateCanvasItem, stageRef, callbackRef]);
 
   return (
     <div className="canvas-container">

@@ -13,15 +13,15 @@ export default function ImageHandle(props) {
   }
 
   const thumbnails = useMemo(() => {
-    return images.map((info, index) => {
+    return images.map((item, index) => {
       return (
-        <Grid item xs={3}>
+        <Grid item xs={3} key={index}
+        >
           <img
-            key={index}
-            src={info.dataURL}
+            src={item.info.dataURL}
             alt={`thumbnail ${index}`}
             className="img-handle-thumbnail"
-            onClick={() => thumbClick(info)}
+            onClick={() => thumbClick(item)}
           />
         </Grid>
       );

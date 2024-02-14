@@ -2,18 +2,28 @@
   "menu": {
     "shapes": [
       {
-        "id": "shape1",
-        "shape": "rect"
+        "id": "shape2",
+        "shape": "circle",
+        "info":{}
       },
       {
-        "id": "shape2",
-        "shape": "circle"
+        "id": "shape1",
+        "shape": "rect",
+        "info":{}
+      },
+      {
+        "id": "shape4",
+        "shape": "star",
+        "info":{}
       }
     ],
     "images": []
   },
   "stage": {
-    "gridConfig": {},
+    "gridConfig": {
+      "cellSize":50,
+      "snap":true
+    },
     "shapes": []
   }
 }
